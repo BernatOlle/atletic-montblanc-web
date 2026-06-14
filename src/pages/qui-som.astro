@@ -1,0 +1,143 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+---
+
+<Layout title="Qui som" description="Coneix la història i els valors del Club Atlètic Montblanc, el club d'atletisme popular de la Conca de Barberà.">
+  <!-- Page header -->
+  <section class="bg-club-dark text-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+      <nav class="text-sm text-gray-400 mb-4">
+        <a href="/" class="hover:text-white transition-colors">Inici</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">El Club</span>
+      </nav>
+      <h1 class="text-4xl font-extrabold">El Club</h1>
+      <p class="text-gray-300 text-lg mt-2">Qui som i per a què existim</p>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+    <div class="grid lg:grid-cols-3 gap-12">
+      <!-- Main content -->
+      <div class="lg:col-span-2 space-y-10">
+
+        <!-- Història -->
+        <div>
+          <h2 class="text-2xl font-bold text-club-dark mb-4 flex items-center gap-2">
+            <span class="h-1 w-8 bg-primary rounded-full inline-block"></span>
+            Història del club
+          </h2>
+          <div class="prose prose-lg text-club-mid leading-relaxed space-y-4">
+            <p>
+              El <strong class="text-club-dark">Club Atlètic Montblanc</strong> va ser creat el <strong class="text-club-dark">març de 1995</strong>. L'acte de presentació va comptar amb la presència d'Arcadi Alibés i va marcar l'inici d'un projecte esportiu que ha crescut any rere any fins a convertir-se en un referent de l'atletisme popular i l'excursionisme a la Conca de Barberà.
+            </p>
+            <p>
+              L'objectiu fundacional del club és la <strong class="text-club-dark">promoció de l'atletisme i l'excursionisme</strong>, tant en la seva vessant popular com competitiva. En l'actualitat comptem amb uns <strong class="text-club-dark">50 socis</strong> que participen activament en les carreres, les caminades i les activitats del club.
+            </p>
+            <p>
+              Des dels seus inicis, el club organitza les dues carreres emblemàtiques de la comarca: la <strong class="text-club-dark">Cursa a l'Ermita de Sant Josep</strong> (que l'any 2026 arriba a la seva 47a edició popular i 30a de fons) i la <strong class="text-club-dark">Pujada a l'Ermita de Sant Joan</strong> (33a edició el 2026). A aquestes dues s'hi han sumat la <strong class="text-club-dark">Cursa de la Dona</strong> i la <strong class="text-club-dark">Sant Silvestre Montblanquina</strong>, tancant el calendari anual del club amb quatre proves de referència.
+            </p>
+            <p>
+              A més de les carreres, el club organitza <strong class="text-club-dark">caminades mensuals</strong> al llarg de tot l'any per descobrir els racons més bonics de la Conca de Barberà, les Muntanyes de Prades i les comarques veïnes.
+            </p>
+          </div>
+        </div>
+
+        <!-- Missió i valors -->
+        <div>
+          <h2 class="text-2xl font-bold text-club-dark mb-4 flex items-center gap-2">
+            <span class="h-1 w-8 bg-primary rounded-full inline-block"></span>
+            Missió i valors
+          </h2>
+          <p class="text-club-mid leading-relaxed mb-6">
+            La nostra missió és fomentar l'esport popular, la salut i la vida activa entre els habitants de la Conca de Barberà, sense importar l'edat ni el nivell esportiu.
+          </p>
+          <div class="grid sm:grid-cols-3 gap-4">
+            {[
+              { icon: 'bolt' as const, title: 'Esport popular', desc: 'Activitats per a tothom, independentment del nivell. L\'important és participar.' },
+              { icon: 'users' as const, title: 'Comunitat', desc: 'Créixer com a comunitat esportiva arrelada al territori de la Conca de Barberà.' },
+              { icon: 'globe' as const, title: 'Natura i territori', desc: 'Gaudir i donar a conèixer els paisatges i camins de la nostra comarca.' },
+            ].map(v => (
+              <div class="bg-club-light rounded-xl p-5">
+                <div class="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+                  <Icon name={v.icon} class="h-5 w-5 text-primary" />
+                </div>
+                <h3 class="font-bold text-club-dark mb-2">{v.title}</h3>
+                <p class="text-sm text-club-mid leading-relaxed">{v.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Activitats -->
+        <div>
+          <h2 class="text-2xl font-bold text-club-dark mb-4 flex items-center gap-2">
+            <span class="h-1 w-8 bg-primary rounded-full inline-block"></span>
+            Què organitzem
+          </h2>
+          <div class="space-y-3">
+            {[
+              { title: 'Pujada a l\'Ermita de Sant Joan', desc: '7,2 km i 542 m de desnivell. La nostra cursa de muntanya més emblemàtica, cada 24 de juny.', href: '/carreres/sant-joan' },
+              { title: 'Cursa a l\'Ermita de Sant Josep', desc: '10 km de fons + 3 km popular. Cada 1 de maig a l\'Ermita de Sant Josep.', href: '/carreres/sant-josep' },
+              { title: 'Cursa Solidària de la Dona', desc: '5 km solidaris per carrers i camins de Montblanc, cada novembre.', href: '/carreres/cursa-dona' },
+              { title: 'Sant Silvestre Montblanquina', desc: '3,4 km per acomiadar l\'any el 31 de desembre. Amb cursa infantil de 500 m.', href: '/carreres/sant-silvestre' },
+              { title: 'Caminades mensuals', desc: 'Itineraris de diferent dificultat per descobrir la Conca de Barberà i voltants.', href: '/caminades' },
+            ].map(a => (
+              <a href={a.href} class="flex items-start gap-4 p-4 bg-white border border-club-beige rounded-xl hover:border-primary hover:shadow-sm transition-all group">
+                <span class="h-2 w-2 bg-primary rounded-full mt-2 flex-shrink-0"></span>
+                <div>
+                  <p class="font-semibold text-club-dark group-hover:text-primary transition-colors">{a.title}</p>
+                  <p class="text-sm text-club-mid mt-0.5">{a.desc}</p>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Sidebar -->
+      <aside class="space-y-6">
+        <!-- Junta -->
+        <div class="bg-club-light rounded-xl p-6">
+          <h3 class="font-bold text-club-dark mb-4">Junta directiva</h3>
+          <ul class="space-y-3 text-sm text-club-mid">
+            <li class="flex flex-col">
+              <span class="font-semibold text-club-dark">President/a</span>
+              <span>— Posa't en contacte amb el club</span>
+            </li>
+            <li class="flex flex-col">
+              <span class="font-semibold text-club-dark">Secretari/a</span>
+              <span>—</span>
+            </li>
+            <li class="flex flex-col">
+              <span class="font-semibold text-club-dark">Tresorer/a</span>
+              <span>—</span>
+            </li>
+          </ul>
+          <p class="text-xs text-club-mid mt-4 italic">Per a informació sobre la junta, contacta'ns.</p>
+        </div>
+
+        <!-- Patrocinadors -->
+        <div class="bg-club-light rounded-xl p-6">
+          <h3 class="font-bold text-club-dark mb-3">Col·laboradors</h3>
+          <ul class="text-sm text-club-mid space-y-1">
+            <li>• Ajuntament de Montblanc</li>
+            <li>• Turisme Montblanc</li>
+            <li>• Entitats locals de la Conca</li>
+          </ul>
+        </div>
+
+        <!-- CTA -->
+        <div class="bg-primary text-white rounded-xl p-6 text-center">
+          <p class="font-bold text-lg mb-2">Vols formar part del club?</p>
+          <p class="text-primary-light text-sm mb-4">Descobreix els avantatges de ser soci.</p>
+          <a href="/fes-te-soci" class="inline-block bg-white text-primary font-bold text-sm px-5 py-2.5 rounded-lg hover:bg-primary-light hover:text-white transition-colors">
+            Fes-te soci
+          </a>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Layout>

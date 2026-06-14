@@ -1,0 +1,90 @@
+---
+import Icon from './Icon.astro';
+
+const year = new Date().getFullYear();
+
+// Enllaços de xarxes (substituir per les URLs reals del club)
+const socials = [
+  { name: 'instagram' as const, label: 'Instagram', href: 'https://www.instagram.com' },
+  { name: 'facebook' as const, label: 'Facebook', href: 'https://www.facebook.com' },
+  { name: 'youtube' as const, label: 'YouTube', href: 'https://www.youtube.com' },
+];
+---
+
+<footer class="bg-club-dark text-white mt-16">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <!-- Brand -->
+      <div class="lg:col-span-1">
+        <a href="/" class="flex items-center gap-3 mb-4">
+          <img
+            src="https://atleticmontblanc.cat/wp-content/uploads/2018/08/logo-90x90.jpg"
+            alt="Club Atlètic Montblanc"
+            class="h-12 w-12 rounded-full object-cover"
+          />
+          <div>
+            <p class="text-primary font-bold leading-tight">Club Atlètic</p>
+            <p class="text-white font-bold leading-tight">Montblanc</p>
+          </div>
+        </a>
+        <p class="text-gray-400 text-sm leading-relaxed">
+          L'atletisme popular de la Conca de Barberà. Promovent l'esport i la salut des de Montblanc.
+        </p>
+      </div>
+
+      <!-- Navegació -->
+      <div>
+        <h3 class="font-semibold text-white mb-3 text-sm uppercase tracking-wide">El club</h3>
+        <ul class="space-y-2">
+          <li><a href="/qui-som" class="text-gray-400 hover:text-white text-sm transition-colors">Qui som</a></li>
+          <li><a href="/fes-te-soci" class="text-gray-400 hover:text-white text-sm transition-colors">Fes-te soci</a></li>
+          <li><a href="/contacte" class="text-gray-400 hover:text-white text-sm transition-colors">Contacte</a></li>
+        </ul>
+      </div>
+
+      <!-- Activitats -->
+      <div>
+        <h3 class="font-semibold text-white mb-3 text-sm uppercase tracking-wide">Activitats</h3>
+        <ul class="space-y-2">
+          <li><a href="/carreres" class="text-gray-400 hover:text-white text-sm transition-colors">Carreres</a></li>
+          <li><a href="/caminades" class="text-gray-400 hover:text-white text-sm transition-colors">Caminades</a></li>
+          <li><a href="/noticies" class="text-gray-400 hover:text-white text-sm transition-colors">Notícies</a></li>
+        </ul>
+      </div>
+
+      <!-- Contacte i xarxes -->
+      <div>
+        <h3 class="font-semibold text-white mb-3 text-sm uppercase tracking-wide">Contacte</h3>
+        <ul class="space-y-2 mb-4">
+          <li>
+            <a href="mailto:atleticmontblanc@gmail.com" class="text-gray-400 hover:text-white text-sm transition-colors break-all">
+              atleticmontblanc@gmail.com
+            </a>
+          </li>
+          <li class="text-gray-400 text-sm">Montblanc, Conca de Barberà</li>
+        </ul>
+        <div class="flex gap-3">
+          {socials.map((s) => (
+            <a
+              href={s.href}
+              target="_blank"
+              rel="noopener"
+              aria-label={s.label}
+              class="h-9 w-9 flex items-center justify-center rounded-full bg-white/5 text-gray-300 hover:bg-primary hover:text-white transition-colors"
+            >
+              <Icon name={s.name} class="h-5 w-5" />
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    <div class="border-t border-gray-700 mt-8 pt-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p class="text-gray-500 text-xs">© {year} Club Atlètic Montblanc. Tots els drets reservats.</p>
+      <div class="flex gap-4">
+        <a href="https://www.montblanc.cat" target="_blank" rel="noopener" class="text-gray-500 hover:text-gray-300 text-xs transition-colors">Ajuntament de Montblanc</a>
+        <a href="https://www.fcacat.cat" target="_blank" rel="noopener" class="text-gray-500 hover:text-gray-300 text-xs transition-colors">Federació Catalana d'Atletisme</a>
+      </div>
+    </div>
+  </div>
+</footer>

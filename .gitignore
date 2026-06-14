@@ -1,0 +1,17 @@
+# Dependències
+node_modules/
+
+# Sortida de build
+dist/
+.astro/
+
+# Còpia escrapejada de la web antiga (HTTrack) — no es publica
+atleticmontblanc/
+
+# Sistema / editor
+.DS_Store
+*.log
+
+# Variables d'entorn
+.env
+.env.*

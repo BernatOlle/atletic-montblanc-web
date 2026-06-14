@@ -1,0 +1,384 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Icon from '../../../components/Icon.astro';
+import MapaGpx from '../../../components/MapaGpx.astro';
+import { getCollection } from 'astro:content';
+import { RACES, type RaceKey, wikiloc } from '../../../lib/races';
+
+export async function getStaticPaths() {
+  const carreres = await getCollection('carreres');
+  return carreres.map(c => ({
+    params: { race: c.data.race, year: String(c.data.year) },
+    props: { carrera: c },
+  }));
+}
+
+const { carrera } = Astro.props;
+const { Content } = await carrera.render();
+const {
+  title, race, year, date, edition, distance, elevation, location,
+  registrationUrl, registrationDeadline, reglamentUrl, recorregutUrl,
+  resultsUrl, photosUrl, photos, image, modalities,
+} = carrera.data;
+
+const raceInfo = RACES[race as RaceKey];
+const today = new Date();
+const isUpcoming = date >= today;
+
+const effectiveRouteUrl = recorregutUrl ?? (raceInfo.routeUrl || null);
+const mapSrc = effectiveRouteUrl ? wikiloc(effectiveRouteUrl) : null;
+const reglamentLink = reglamentUrl ?? `/carreres/${race}/${year}/reglament`;
+
+const allPhotos: string[] = [];
+if (photosUrl) allPhotos.push(photosUrl);
+if (photos) allPhotos.push(...photos.filter(p => p !== photosUrl));
+
+const formattedDate = date.toLocaleDateString('ca-ES', {
+  weekday: 'long', day: 'numeric', month: 'long', year: 'numeric',
+});
+
+const allCarreres = await getCollection('carreres');
+const raceEditions = allCarreres
+  .filter(c => c.data.race === race)
+  .sort((a, b) => a.data.year - b.data.year);
+const currentIdx = raceEditions.findIndex(c => c.data.year === year);
+const prevEdition = raceEditions[currentIdx - 1] ?? null;
+const nextEdition = raceEditions[currentIdx + 1] ?? null;
+---
+
+<Layout title={title} description={raceInfo.description}>
+
+  <!-- HERO -->
+  <div class="relative bg-club-dark overflow-hidden min-h-[280px] flex items-end">
+    {raceInfo.image && (
+      <img
+        src={raceInfo.image}
+        alt={title}
+        class="absolute inset-0 w-full h-full object-cover opacity-20"
+      />
+    )}
+    <div class="relative w-full max-w-4xl mx-auto px-4 sm:px-6 py-12">
+      <nav class="text-sm text-gray-400 mb-4">
+        <a href="/" class="hover:text-white transition-colors">Inici</a>
+        <span class="mx-2">/</span>
+        <a href="/carreres" class="hover:text-white transition-colors">Carreres</a>
+        <span class="mx-2">/</span>
+        <a href={`/carreres/${race}`} class="hover:text-white transition-colors">{raceInfo.shortName}</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">{year}</span>
+      </nav>
+
+      <div class="flex flex-wrap items-center gap-3 mb-2">
+        {isUpcoming && (
+          <span class="inline-flex items-center bg-primary text-white text-xs font-bold px-3 py-1 rounded-full">
+            Pròxima cursa
+          </span>
+        )}
+        {edition && (
+          <span class="bg-white/10 text-white text-xs font-semibold px-3 py-1 rounded-full">
+            {edition}a edició
+          </span>
+        )}
+      </div>
+
+      <h1 class="text-3xl sm:text-4xl font-extrabold text-white leading-tight">{title}</h1>
+      <p class="text-gray-300 capitalize mt-1">{formattedDate}</p>
+    </div>
+  </div>
+
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-10 space-y-6">
+
+    <!-- MODALITATS: targetes diferenciades pujada / caminada -->
+    {modalities && modalities.length > 0 ? (
+      <section>
+        <p class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Modalitats</p>
+        <div class={`grid gap-4 ${modalities.length >= 2 ? 'sm:grid-cols-2' : ''}`}>
+          {modalities.map((m) => {
+            const isCursa = m.type === 'cursa';
+            return (
+              <div class={`rounded-2xl border-2 overflow-hidden ${isCursa ? 'border-primary' : 'border-club-beige'}`}>
+                {/* Header */}
+                <div class={`px-6 py-4 flex items-center justify-between ${isCursa ? 'bg-primary' : 'bg-club-dark'}`}>
+                  <div class="flex items-center gap-3">
+                    <div class="h-9 w-9 bg-white/15 rounded-lg flex items-center justify-center">
+                      <Icon name={isCursa ? 'bolt' : 'users'} class="h-5 w-5 text-white" />
+                    </div>
+                    <div>
+                      <p class="text-white font-extrabold text-lg leading-tight">{m.name}</p>
+                      {m.edition && <p class="text-white/70 text-xs">{m.edition}</p>}
+                    </div>
+                  </div>
+                  <span class={`text-xs font-bold px-2.5 py-1 rounded-full ${isCursa ? 'bg-white text-primary' : 'bg-white/15 text-white'}`}>
+                    {isCursa ? 'Cronometrada' : 'No competitiva'}
+                  </span>
+                </div>
+
+                {/* Info */}
+                <div class={`px-6 py-5 ${isCursa ? 'bg-primary/5' : 'bg-white'}`}>
+                  <dl class="space-y-3">
+                    {m.startTime && (
+                      <div class="flex justify-between items-center text-sm">
+                        <dt class="text-club-mid flex items-center gap-2">
+                          <Icon name="clock" class="h-4 w-4 text-club-mid" />
+                          Hora de sortida
+                        </dt>
+                        <dd class="font-bold text-club-dark text-base">{m.startTime} h</dd>
+                      </div>
+                    )}
+                    {m.dorsalPickup && (
+                      <div class="flex justify-between items-center text-sm border-t border-club-beige pt-3">
+                        <dt class="text-club-mid flex items-center gap-2">
+                          <Icon name="ticket" class="h-4 w-4 text-club-mid" />
+                          Recollida dorsal
+                        </dt>
+                        <dd class="font-semibold text-club-dark">{m.dorsalPickup}</dd>
+                      </div>
+                    )}
+                    {m.price !== undefined && (
+                      <div class="flex justify-between items-center text-sm border-t border-club-beige pt-3">
+                        <dt class="text-club-mid flex items-center gap-2">
+                          <Icon name="tag" class="h-4 w-4 text-club-mid" />
+                          Preu inscripció
+                        </dt>
+                        <dd class="font-bold text-club-dark text-base">{m.price} €</dd>
+                      </div>
+                    )}
+                    {m.maxParticipants && (
+                      <div class="flex justify-between items-center text-sm border-t border-club-beige pt-3">
+                        <dt class="text-club-mid flex items-center gap-2">
+                          <Icon name="users" class="h-4 w-4 text-club-mid" />
+                          Places disponibles
+                        </dt>
+                        <dd class="font-semibold text-club-dark">màx. {m.maxParticipants}</dd>
+                      </div>
+                    )}
+                  </dl>
+
+                  {isUpcoming && (m.registrationUrl || registrationUrl) && (
+                    <a
+                      href={m.registrationUrl ?? registrationUrl}
+                      target="_blank"
+                      rel="noopener"
+                      class={`mt-5 flex items-center justify-center gap-2 px-4 py-3 font-bold text-sm rounded-xl transition-colors ${
+                        isCursa
+                          ? 'bg-primary text-white hover:bg-red-700'
+                          : 'bg-club-dark text-white hover:bg-club-mid'
+                      }`}
+                    >
+                      <Icon name="ticket" class="h-4 w-4" />
+                      Inscriu-te a la {isCursa ? 'pujada' : 'caminada'}
+                    </a>
+                  )}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {registrationDeadline && isUpcoming && (
+          <p class="mt-3 text-sm text-club-mid flex items-center gap-2">
+            <Icon name="clock" class="h-4 w-4 text-primary flex-shrink-0" />
+            Inscripcions obertes fins al <strong class="text-club-dark">
+              {registrationDeadline.toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </strong> o fins esgotar places
+          </p>
+        )}
+      </section>
+    ) : (
+      /* Si no hi ha modalitats, mostra fitxa tècnica simple */
+      <section class="bg-club-light rounded-2xl p-7">
+        <p class="text-xs font-bold text-primary uppercase tracking-widest mb-5">Fitxa tècnica</p>
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {distance && (
+            <div class="bg-white rounded-xl p-4 text-center">
+              <Icon name="map" class="h-5 w-5 text-primary mx-auto mb-2" />
+              <p class="text-2xl font-extrabold text-club-dark">{distance}</p>
+              <p class="text-xs text-club-mid mt-0.5">km</p>
+            </div>
+          )}
+          {elevation && (
+            <div class="bg-white rounded-xl p-4 text-center">
+              <Icon name="arrow-trending-up" class="h-5 w-5 text-primary mx-auto mb-2" />
+              <p class="text-2xl font-extrabold text-club-dark">+{elevation}</p>
+              <p class="text-xs text-club-mid mt-0.5">m desnivell</p>
+            </div>
+          )}
+          {edition && (
+            <div class="bg-white rounded-xl p-4 text-center">
+              <Icon name="trophy" class="h-5 w-5 text-primary mx-auto mb-2" />
+              <p class="text-2xl font-extrabold text-club-dark">{edition}a</p>
+              <p class="text-xs text-club-mid mt-0.5">edició</p>
+            </div>
+          )}
+          {location && (
+            <div class="bg-white rounded-xl p-4 text-center">
+              <Icon name="map-pin" class="h-5 w-5 text-primary mx-auto mb-2" />
+              <p class="text-sm font-bold text-club-dark leading-snug">{location.split(',')[0]}</p>
+              <p class="text-xs text-club-mid mt-0.5">sortida</p>
+            </div>
+          )}
+        </div>
+        {registrationDeadline && isUpcoming && (
+          <p class="mt-4 text-sm text-club-mid flex items-center gap-2">
+            <Icon name="clock" class="h-4 w-4 text-primary flex-shrink-0" />
+            Termini d'inscripció: <strong class="text-club-dark">
+              {registrationDeadline.toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric' })}
+            </strong>
+          </p>
+        )}
+      </section>
+    )}
+
+    <!-- RECORREGUT + MAPA -->
+    {(raceInfo.gpxFile || mapSrc || effectiveRouteUrl) && (
+      <section class="bg-white rounded-2xl border border-club-beige p-7">
+        <p class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Recorregut</p>
+        {raceInfo.gpxFile ? (
+          <MapaGpx gpxUrl={raceInfo.gpxFile} />
+        ) : mapSrc ? (
+          <div class="rounded-xl overflow-hidden border border-club-beige" style="height: 420px">
+            <iframe
+              src={mapSrc}
+              width="100%"
+              height="420"
+              frameborder="0"
+              scrolling="no"
+              title={`Recorregut ${title}`}
+              class="w-full h-full"
+            ></iframe>
+          </div>
+        ) : null}
+        {effectiveRouteUrl && (
+          <a
+            href={effectiveRouteUrl}
+            target="_blank"
+            rel="noopener"
+            class="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-primary hover:underline"
+          >
+            <Icon name="map" class="h-4 w-4" />
+            Veure recorregut a Wikiloc →
+          </a>
+        )}
+      </section>
+    )}
+
+    <!-- SAMARRETA (si és una cursa upcoming amb imatge) -->
+    {'shirtImage' in raceInfo && raceInfo.shirtImage && isUpcoming && (
+      <section class="bg-white rounded-2xl border border-club-beige overflow-hidden">
+        <div class="flex flex-col sm:flex-row">
+          <div class="sm:w-5/12 w-full">
+            <img
+              src={raceInfo.shirtImage}
+              alt="Samarreta commemorativa"
+              class="w-full h-52 sm:h-full object-cover"
+            />
+          </div>
+          <div class="sm:w-7/12 p-7 flex flex-col justify-center">
+            <p class="text-xs font-bold text-primary uppercase tracking-widest mb-2">Inclòs en la inscripció</p>
+            <h3 class="text-xl font-extrabold text-club-dark mb-3">Samarreta commemorativa</h3>
+            <ul class="text-sm text-club-mid space-y-1.5">
+              <li class="flex items-center gap-2"><Icon name="check-circle" class="h-4 w-4 text-green-600 flex-shrink-0" /> Samarreta de l'edició (talla a elecció)</li>
+              <li class="flex items-center gap-2"><Icon name="check-circle" class="h-4 w-4 text-green-600 flex-shrink-0" /> Record de la cursa o caminada</li>
+              <li class="flex items-center gap-2"><Icon name="check-circle" class="h-4 w-4 text-green-600 flex-shrink-0" /> Esmorzar a l'Ermita de Sant Joan</li>
+              <li class="flex items-center gap-2"><Icon name="check-circle" class="h-4 w-4 text-green-600 flex-shrink-0" /> Avituallament durant el recorregut</li>
+              <li class="flex items-center gap-2"><Icon name="check-circle" class="h-4 w-4 text-green-600 flex-shrink-0" /> Guarda-roba i dutxes a la piscina municipal</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    )}
+
+    <!-- INFORMACIÓ I REGLAMENT (markdown body) -->
+    <section class="bg-white rounded-2xl border border-club-beige p-7">
+      <p class="text-xs font-bold text-primary uppercase tracking-widest mb-5">Informació i reglament</p>
+      <div class="prose prose-base max-w-none
+        [&_h2]:text-lg [&_h2]:font-bold [&_h2]:text-club-dark [&_h2]:mt-6 [&_h2]:mb-3 [&_h2]:pb-1 [&_h2]:border-b [&_h2]:border-club-beige [&_h2:first-child]:mt-0
+        [&_h3]:text-base [&_h3]:font-bold [&_h3]:text-club-dark [&_h3]:mt-4 [&_h3]:mb-2
+        [&_p]:text-club-mid [&_p]:leading-relaxed [&_p]:mb-3 [&_p]:text-sm
+        [&_ul]:my-2 [&_ul]:space-y-1.5 [&_li]:text-sm [&_li]:text-club-mid [&_li]:leading-relaxed
+        [&_strong]:text-club-dark [&_strong]:font-semibold
+        [&_table]:w-full [&_table]:border-collapse [&_table]:my-4 [&_table]:text-sm
+        [&_th]:text-left [&_th]:font-bold [&_th]:text-club-dark [&_th]:py-2 [&_th]:px-3 [&_th]:bg-club-light
+        [&_td]:py-2 [&_td]:px-3 [&_td]:border-b [&_td]:border-club-beige [&_td]:text-club-mid
+        [&_tr:first-child_td]:border-t [&_tr:first-child_td]:border-club-beige
+      ">
+        <Content />
+      </div>
+    </section>
+
+    <!-- ACCIONS CURSA PASSADA: fotos + resultats -->
+    {!isUpcoming && (allPhotos.length > 0 || resultsUrl) && (
+      <section class="bg-club-light rounded-2xl p-7">
+        <p class="text-xs font-bold text-primary uppercase tracking-widest mb-4">Edició {year}</p>
+        <div class="flex flex-wrap gap-3">
+          {allPhotos.map((url, i) => (
+            <a
+              href={url}
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-2 px-5 py-3 bg-club-dark text-white font-semibold rounded-xl hover:bg-club-mid transition-colors text-sm"
+            >
+              <Icon name="camera" class="h-4 w-4" />
+              {allPhotos.length > 1 ? `Àlbum de fotos ${i + 1}` : 'Fotos de la cursa'}
+            </a>
+          ))}
+          {resultsUrl && (
+            <a
+              href={resultsUrl}
+              target="_blank"
+              rel="noopener"
+              class="inline-flex items-center gap-2 px-5 py-3 bg-white border-2 border-club-beige text-club-dark font-semibold rounded-xl hover:border-club-dark transition-colors text-sm"
+            >
+              <Icon name="chart-bar" class="h-4 w-4" />
+              Resultats oficials
+            </a>
+          )}
+        </div>
+      </section>
+    )}
+
+    <!-- NAVEGACIÓ EDICIONS -->
+    <section class="border-t border-club-beige pt-6">
+      <div class="flex flex-wrap items-center justify-between gap-4">
+        <a href={`/carreres/${race}`} class="inline-flex items-center gap-2 text-sm text-club-mid hover:text-primary transition-colors font-medium">
+          <Icon name="arrow-left" class="h-4 w-4" />
+          Totes les edicions de {raceInfo.shortName}
+        </a>
+        <div class="flex items-center gap-3 text-sm">
+          {prevEdition && (
+            <a
+              href={`/carreres/${race}/${prevEdition.data.year}`}
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-club-beige rounded-lg text-club-mid hover:border-primary hover:text-primary transition-colors"
+            >
+              <Icon name="arrow-left" class="h-3.5 w-3.5" />
+              {prevEdition.data.year}
+            </a>
+          )}
+          <span class="font-bold text-club-dark">{year}</span>
+          {nextEdition && (
+            <a
+              href={`/carreres/${race}/${nextEdition.data.year}`}
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 border border-club-beige rounded-lg text-club-mid hover:border-primary hover:text-primary transition-colors"
+            >
+              {nextEdition.data.year}
+              <Icon name="arrow-right" class="h-3.5 w-3.5" />
+            </a>
+          )}
+        </div>
+      </div>
+    </section>
+
+    <!-- CARTELL DE LA CURSA (al final de tot) -->
+    {image && (
+      <section class="border-t border-club-beige pt-8">
+        <p class="text-xs font-bold text-primary uppercase tracking-widest mb-4 text-center">Cartell</p>
+        <img
+          src={image}
+          alt={`Cartell ${title}`}
+          class="w-full max-w-md mx-auto rounded-2xl border border-club-beige shadow-sm"
+        />
+      </section>
+    )}
+
+  </div>
+</Layout>

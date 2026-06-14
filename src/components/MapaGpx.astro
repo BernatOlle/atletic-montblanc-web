@@ -1,0 +1,155 @@
+---
+interface Props {
+  gpxUrl: string;
+  color?: string;
+}
+const { gpxUrl, color = '#CC2504' } = Astro.props;
+---
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+<div class="rounded-xl overflow-hidden border border-club-beige">
+  <!-- Map -->
+  <div
+    class="mapa-gpx-container w-full"
+    data-gpx={gpxUrl}
+    data-color={color}
+    style="height: 380px"
+  ></div>
+
+  <!-- Elevation profile -->
+  <div class="bg-club-light border-t border-club-beige px-5 pt-4 pb-3">
+    <p class="text-xs font-bold text-primary uppercase tracking-widest mb-2">Perfil de desnivell</p>
+    <canvas class="elevacio-canvas w-full block" style="height: 70px"></canvas>
+    <div class="elevacio-stats flex flex-wrap gap-5 mt-2 text-xs text-club-mid"></div>
+  </div>
+</div>
+
+<script is:inline src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script is:inline src="https://unpkg.com/leaflet-gpx@1.7.0/gpx.js"></script>
+<script is:inline>
+(function () {
+  var container = document.querySelector('.mapa-gpx-container:not([data-init])');
+  if (!container || !window.L) return;
+  container.setAttribute('data-init', '1');
+
+  var gpxUrl = container.getAttribute('data-gpx');
+  var color = container.getAttribute('data-color') || '#CC2504';
+
+  var map = L.map(container, { zoomControl: true, scrollWheelZoom: false });
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+    maxZoom: 18,
+  }).addTo(map);
+
+  new L.GPX(gpxUrl, {
+    async: true,
+    marker_options: { startIconUrl: null, endIconUrl: null, shadowUrl: null, wptIconUrls: { '': null } },
+    polyline_options: { color: color, weight: 4, opacity: 0.9, lineCap: 'round', lineJoin: 'round' },
+  }).on('loaded', function (e) {
+    map.fitBounds(e.target.getBounds(), { padding: [30, 30] });
+  }).addTo(map);
+
+  // Elevation profile
+  fetch(gpxUrl)
+    .then(function (r) { return r.text(); })
+    .then(function (xml) {
+      var parser = new DOMParser();
+      var doc = parser.parseFromString(xml, 'application/xml');
+      var trkpts = Array.from(doc.querySelectorAll('trkpt'));
+      if (!trkpts.length) return;
+
+      function toRad(d) { return d * Math.PI / 180; }
+      function haversine(p1, p2) {
+        var R = 6371000;
+        var lat1 = toRad(parseFloat(p1.getAttribute('lat')));
+        var lat2 = toRad(parseFloat(p2.getAttribute('lat')));
+        var dLat = lat2 - lat1;
+        var dLon = toRad(parseFloat(p2.getAttribute('lon')) - parseFloat(p1.getAttribute('lon')));
+        var a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+              + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      }
+
+      var elevations = [];
+      var distances = [0];
+      var cumDist = 0;
+
+      for (var i = 0; i < trkpts.length; i++) {
+        var ele = trkpts[i].querySelector('ele');
+        elevations.push(ele ? parseFloat(ele.textContent) : 0);
+        if (i > 0) {
+          cumDist += haversine(trkpts[i - 1], trkpts[i]);
+          distances.push(cumDist);
+        }
+      }
+
+      var minEle = Math.min.apply(null, elevations);
+      var maxEle = Math.max.apply(null, elevations);
+      var totalDist = distances[distances.length - 1];
+      var range = maxEle - minEle || 1;
+
+      // Draw canvas chart
+      var canvas = container.closest('.rounded-xl').querySelector('.elevacio-canvas');
+      if (!canvas) return;
+
+      // Wait for layout
+      requestAnimationFrame(function () {
+        canvas.width = canvas.offsetWidth || 600;
+        var W = canvas.width;
+        var H = 70;
+        canvas.height = H;
+        var ctx = canvas.getContext('2d');
+        var padT = 6, padB = 6;
+
+        ctx.clearRect(0, 0, W, H);
+
+        // Subtle grid
+        ctx.strokeStyle = '#ddd8d2';
+        ctx.lineWidth = 1;
+        [0.25, 0.5, 0.75].forEach(function (f) {
+          var gy = padT + (H - padT - padB) * f;
+          ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(W, gy); ctx.stroke();
+        });
+
+        // Area fill
+        ctx.beginPath();
+        for (var j = 0; j < distances.length; j++) {
+          var x = (distances[j] / totalDist) * W;
+          var y = padT + (H - padT - padB) * (1 - (elevations[j] - minEle) / range);
+          j === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.lineTo(W, H); ctx.lineTo(0, H); ctx.closePath();
+        ctx.fillStyle = color + '30';
+        ctx.fill();
+
+        // Line
+        ctx.beginPath();
+        for (var k = 0; k < distances.length; k++) {
+          var lx = (distances[k] / totalDist) * W;
+          var ly = padT + (H - padT - padB) * (1 - (elevations[k] - minEle) / range);
+          k === 0 ? ctx.moveTo(lx, ly) : ctx.lineTo(lx, ly);
+        }
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 2;
+        ctx.lineJoin = 'round';
+        ctx.stroke();
+
+        // Stats
+        var gain = 0;
+        for (var s = 1; s < elevations.length; s++) {
+          var diff = elevations[s] - elevations[s - 1];
+          if (diff > 0) gain += diff;
+        }
+        var statsEl = canvas.nextElementSibling;
+        if (statsEl) {
+          statsEl.innerHTML =
+            '<span>Mín: <strong class="text-club-dark">' + Math.round(minEle) + ' m</strong></span>' +
+            '<span>Màx: <strong class="text-club-dark">' + Math.round(maxEle) + ' m</strong></span>' +
+            '<span>Desnivell: <strong class="text-club-dark">+' + Math.round(gain) + ' m</strong></span>' +
+            '<span>Distància: <strong class="text-club-dark">' + (totalDist / 1000).toFixed(1) + ' km</strong></span>';
+        }
+      });
+    });
+})();
+</script>

@@ -1,0 +1,109 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  title: string;
+  date: Date;
+  href: string;
+  type: 'carrera' | 'caminada';
+  distance?: number;
+  elevation?: number;
+  difficulty?: string;
+  image?: string;
+  featured?: boolean;
+}
+
+const { title, date, href, type, distance, elevation, difficulty, image, featured = false } = Astro.props;
+
+const isPast = date < new Date();
+const formattedDate = date.toLocaleDateString('ca-ES', { day: 'numeric', month: 'long', year: 'numeric' });
+const typeLabel = type === 'carrera' ? 'Carrera' : 'Caminada';
+---
+
+<a
+  href={href}
+  class={`group block bg-white rounded-xl overflow-hidden border transition-all duration-200 ${
+    isPast
+      ? 'border-club-beige hover:border-club-mid hover:shadow-sm opacity-75 hover:opacity-100'
+      : 'border-club-beige hover:border-primary hover:shadow-lg'
+  }`}
+>
+  <!-- Image / placeholder -->
+  <div class="h-44 bg-club-light overflow-hidden relative">
+    {image ? (
+      <img
+        src={image}
+        alt={title}
+        class={`w-full h-full object-cover transition-transform duration-300 group-hover:scale-105 ${isPast ? 'grayscale-[30%]' : ''}`}
+      />
+    ) : (
+      <div class={`w-full h-full flex items-center justify-center ${isPast ? 'bg-gradient-to-br from-club-beige to-club-light' : 'bg-gradient-to-br from-club-beige to-club-light'}`}>
+        {type === 'carrera' ? (
+          <Icon name="flag" class="h-14 w-14 text-club-mid opacity-25" />
+        ) : (
+          <Icon name="map" class="h-14 w-14 text-club-mid opacity-25" />
+        )}
+      </div>
+    )}
+
+    <!-- Badges -->
+    <div class="absolute top-3 left-3 flex gap-1.5 flex-wrap">
+      {featured && !isPast && (
+        <span class="inline-flex items-center gap-1 bg-primary text-white text-xs font-semibold px-2 py-1 rounded-full">
+          <span class="h-1.5 w-1.5 bg-white rounded-full animate-pulse"></span>
+          Destacat
+        </span>
+      )}
+      {isPast && (
+        <span class="inline-flex items-center gap-1 bg-black/50 text-white text-xs font-medium px-2 py-1 rounded-full backdrop-blur-sm">
+          <Icon name="check-circle" class="h-3 w-3" />
+          Finalitzada
+        </span>
+      )}
+    </div>
+
+    <div class="absolute top-3 right-3">
+      <span class={`text-xs font-semibold px-2 py-1 rounded-full ${
+        type === 'carrera'
+          ? 'bg-primary/90 text-white'
+          : 'bg-forest/90 text-white'
+      }`}>
+        {typeLabel}
+      </span>
+    </div>
+  </div>
+
+  <!-- Info -->
+  <div class="p-4">
+    <p class={`text-xs mb-1 font-medium ${isPast ? 'text-club-mid' : 'text-primary'}`}>
+      {formattedDate}
+    </p>
+    <h3 class={`font-bold leading-snug mb-3 transition-colors ${
+      isPast
+        ? 'text-club-mid group-hover:text-club-dark'
+        : 'text-club-dark group-hover:text-primary'
+    }`}>
+      {title}
+    </h3>
+
+    {(distance || elevation || difficulty) && (
+      <div class="flex flex-wrap gap-3 text-xs text-club-mid">
+        {distance && (
+          <span class="flex items-center gap-1">
+            <Icon name="map" class="h-3.5 w-3.5" />
+            {distance} km
+          </span>
+        )}
+        {elevation && (
+          <span class="flex items-center gap-1">
+            <Icon name="arrow-trending-up" class="h-3.5 w-3.5" />
+            +{elevation} m
+          </span>
+        )}
+        {difficulty && (
+          <span class="capitalize">{difficulty}</span>
+        )}
+      </div>
+    )}
+  </div>
+</a>

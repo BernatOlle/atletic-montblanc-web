@@ -1,0 +1,58 @@
+/*
+ * Estils base globals del Club Atlètic Montblanc.
+ * Tailwind aporta les utilitats; aquí només posem el que ha de ser
+ * coherent a tot el lloc: focus, scroll, selecció i reveal-on-scroll.
+ */
+
+:root {
+  scroll-behavior: smooth;
+}
+
+/* Respecta qui prefereix menys moviment */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Anell de focus de marca, només per a navegació amb teclat */
+:focus-visible {
+  outline: 2px solid #cc2504;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+/* No mostrem l'anell en clics de ratolí sobre elements ja estilitzats */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Color de selecció de text de marca */
+::selection {
+  background-color: #cc2504;
+  color: #ffffff;
+}
+
+/* Reveal-on-scroll: els elements amb [data-reveal] entren suaument.
+   Si no hi ha JS, es veuen igualment (estat final per defecte). */
+[data-reveal] {
+  opacity: 1;
+  transform: none;
+}
+.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(16px);
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.js [data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}

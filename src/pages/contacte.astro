@@ -1,0 +1,157 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+
+<Layout title="Contacte" description="Contacta amb el Club Atlètic Montblanc. Escriu-nos per a qualsevol consulta sobre carreres, caminades o associació.">
+  <section class="bg-club-dark text-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+      <nav class="text-sm text-gray-400 mb-4">
+        <a href="/" class="hover:text-white transition-colors">Inici</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">Contacte</span>
+      </nav>
+      <h1 class="text-4xl font-extrabold">Contacte</h1>
+      <p class="text-gray-300 text-lg mt-2">Estem aquí per ajudar-te</p>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+    <div class="grid lg:grid-cols-2 gap-12">
+
+      <!-- Formulari -->
+      <div>
+        <h2 class="text-2xl font-bold text-club-dark mb-6">Envia'ns un missatge</h2>
+        <form
+          action="https://formsubmit.co/atleticmontblanc@gmail.com"
+          method="POST"
+          class="space-y-5"
+        >
+          <input type="hidden" name="_subject" value="Contacte web Club Atlètic Montblanc" />
+          <input type="hidden" name="_captcha" value="false" />
+          <input type="hidden" name="_next" value="/contacte?enviat=1" />
+
+          <div>
+            <label for="nom" class="block text-sm font-medium text-club-dark mb-1.5">Nom i cognoms <span class="text-primary">*</span></label>
+            <input
+              type="text"
+              id="nom"
+              name="nom"
+              required
+              class="w-full px-4 py-2.5 border border-club-beige rounded-lg text-club-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              placeholder="El teu nom"
+            />
+          </div>
+
+          <div>
+            <label for="email" class="block text-sm font-medium text-club-dark mb-1.5">Correu electrònic <span class="text-primary">*</span></label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              required
+              class="w-full px-4 py-2.5 border border-club-beige rounded-lg text-club-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors"
+              placeholder="el-teu@correu.cat"
+            />
+          </div>
+
+          <div>
+            <label for="assumpte" class="block text-sm font-medium text-club-dark mb-1.5">Assumpte</label>
+            <select
+              id="assumpte"
+              name="assumpte"
+              class="w-full px-4 py-2.5 border border-club-beige rounded-lg text-club-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors bg-white"
+            >
+              <option value="">Selecciona una opció</option>
+              <option value="fer-se-soci">Fer-me soci/a</option>
+              <option value="informacio-carreres">Informació sobre carreres</option>
+              <option value="informacio-caminades">Informació sobre caminades</option>
+              <option value="altres">Altres consultes</option>
+            </select>
+          </div>
+
+          <div>
+            <label for="missatge" class="block text-sm font-medium text-club-dark mb-1.5">Missatge <span class="text-primary">*</span></label>
+            <textarea
+              id="missatge"
+              name="missatge"
+              required
+              rows="5"
+              class="w-full px-4 py-2.5 border border-club-beige rounded-lg text-club-dark focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-colors resize-none"
+              placeholder="Escriu el teu missatge aquí..."
+            ></textarea>
+          </div>
+
+          <button
+            type="submit"
+            class="w-full px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors flex items-center justify-center gap-2"
+          >
+            Enviar missatge
+            <svg class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+          </button>
+          <p class="text-xs text-club-mid">
+            En enviar aquest formulari acceptes que les teves dades siguin tractades per respondre a la teva consulta.
+          </p>
+        </form>
+      </div>
+
+      <!-- Dades de contacte -->
+      <div class="space-y-6">
+        <h2 class="text-2xl font-bold text-club-dark mb-2">Informació de contacte</h2>
+
+        <div class="space-y-4">
+          <div class="flex items-start gap-4 p-4 bg-club-light rounded-xl">
+            <div class="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <div>
+              <p class="font-semibold text-club-dark text-sm">Correu electrònic</p>
+              <a href="mailto:atleticmontblanc@gmail.com" class="text-primary hover:underline text-sm">atleticmontblanc@gmail.com</a>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 p-4 bg-club-light rounded-xl">
+            <div class="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="font-semibold text-club-dark text-sm">Ubicació</p>
+              <p class="text-club-mid text-sm">Montblanc, Conca de Barberà<br />Tarragona, Catalunya</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 p-4 bg-club-light rounded-xl">
+            <div class="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+              <svg class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p class="font-semibold text-club-dark text-sm">Segueix-nos</p>
+              <div class="flex gap-3 mt-2">
+                <a href="https://www.instagram.com" target="_blank" rel="noopener" class="text-club-mid hover:text-primary transition-colors text-sm font-medium">Instagram</a>
+                <a href="https://www.facebook.com" target="_blank" rel="noopener" class="text-club-mid hover:text-primary transition-colors text-sm font-medium">Facebook</a>
+                <a href="https://www.youtube.com" target="_blank" rel="noopener" class="text-club-mid hover:text-primary transition-colors text-sm font-medium">YouTube</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Links útils -->
+        <div class="border-t border-club-beige pt-6">
+          <h3 class="font-semibold text-club-dark mb-3">Enllaços d'interès</h3>
+          <ul class="space-y-2 text-sm">
+            <li><a href="https://www.montblanc.cat" target="_blank" rel="noopener" class="text-primary hover:underline">Ajuntament de Montblanc →</a></li>
+            <li><a href="https://www.turismeconca.cat" target="_blank" rel="noopener" class="text-primary hover:underline">Turisme Conca de Barberà →</a></li>
+            <li><a href="https://www.fcacat.cat" target="_blank" rel="noopener" class="text-primary hover:underline">Federació Catalana d'Atletisme →</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</Layout>

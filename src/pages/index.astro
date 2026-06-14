@@ -1,0 +1,303 @@
+---
+import Layout from '../layouts/Layout.astro';
+import EventCard from '../components/EventCard.astro';
+import NewsCard from '../components/NewsCard.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import Icon from '../components/Icon.astro';
+import { getCollection } from 'astro:content';
+import { RACES, type RaceKey } from '../lib/races';
+
+const allCarreres = await getCollection('carreres');
+const allCaminades = await getCollection('caminades');
+const allNoticies = await getCollection('noticies');
+
+const today = new Date();
+
+// Fallback d'imatge per la caminada quan no en té de pròpia
+const CAMINADA_FALLBACK = '/images/caminada-grup.jpg';
+
+// Normalitzem carreres i caminades futures a una sola llista d'esdeveniments
+const upcomingCarreres = allCarreres
+  .filter(c => c.data.date >= today)
+  .map(c => ({
+    title: c.data.title,
+    date: c.data.date,
+    href: `/carreres/${c.data.race}/${c.data.year}`,
+    type: 'carrera' as const,
+    distance: c.data.distance,
+    elevation: c.data.elevation,
+    difficulty: undefined as string | undefined,
+    image: c.data.image ?? RACES[c.data.race as RaceKey]?.image,
+    featured: c.data.featured,
+  }));
+
+const upcomingCaminades = allCaminades
+  .filter(c => c.data.date >= today)
+  .map(c => ({
+    title: c.data.title,
+    date: c.data.date,
+    href: `/caminades/${c.slug}`,
+    type: 'caminada' as const,
+    distance: c.data.distance,
+    elevation: c.data.elevation,
+    difficulty: c.data.difficulty,
+    image: c.data.image ?? CAMINADA_FALLBACK,
+    featured: c.data.featured,
+  }));
+
+const upcomingEvents = [...upcomingCarreres, ...upcomingCaminades]
+  .sort((a, b) => a.date.getTime() - b.date.getTime())
+  .slice(0, 6);
+
+const latestNoticies = allNoticies
+  .sort((a, b) => b.data.date.getTime() - a.data.date.getTime())
+  .slice(0, 3);
+
+const featuredEvent =
+  upcomingEvents.find(e => e.featured) ?? upcomingEvents[0] ?? null;
+
+const stats = [
+  { target: 150, prefix: '+', label: 'Socis actius' },
+  { target: 4, prefix: '', label: 'Carreres anuals' },
+  { target: 10, prefix: '+', label: "Caminades l'any" },
+  { target: 30, prefix: '+', label: "Anys d'història" },
+];
+---
+
+<Layout title="Inici">
+  <!-- HERO -->
+  <section class="relative isolate overflow-hidden bg-club-dark text-white">
+    <!-- Foto de fons (rotació aleatòria a cada visita; veure script al final) -->
+    <img
+      id="hero-bg"
+      src="/images/hero-index.jpg"
+      alt="Atletes del Club Atlètic Montblanc"
+      class="absolute inset-0 -z-10 h-full w-full object-cover"
+    />
+    <!-- Overlay fosc + degradat per llegibilitat -->
+    <div class="absolute inset-0 -z-10 bg-gradient-to-r from-club-dark via-club-dark/90 to-club-dark/70"></div>
+    <div class="absolute inset-0 -z-10 bg-club-dark/40"></div>
+
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-20 sm:py-28">
+      <div class="grid lg:grid-cols-2 gap-12 items-center">
+        <div>
+          <span class="inline-block bg-primary/30 text-white border border-primary/50 text-xs font-semibold px-3 py-1 rounded-full mb-4 uppercase tracking-wide backdrop-blur-sm">
+            Club Atlètic Montblanc
+          </span>
+          <h1 class="text-4xl sm:text-6xl font-extrabold leading-tight mb-4 [text-shadow:0_2px_12px_rgba(0,0,0,0.6)]">
+            L'atletisme popular de la
+            <span class="text-primary-light"> Conca de Barberà</span>
+          </h1>
+          <p class="text-gray-100 text-lg leading-relaxed mb-8 max-w-xl [text-shadow:0_1px_8px_rgba(0,0,0,0.7)]">
+            Organitzem carreres populars i caminades per la nostra comarca. Una comunitat d'esportistes de totes les edats units per la passió pel moviment.
+          </p>
+          <div class="flex flex-wrap gap-3">
+            <a href="/fes-te-soci" class="inline-flex items-center px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30">
+              Fes-te soci
+              <svg class="ml-2 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+            </a>
+            <a href="/qui-som" class="inline-flex items-center px-6 py-3 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-colors border border-white/20 backdrop-blur-sm">
+              Qui som
+            </a>
+          </div>
+        </div>
+
+        <!-- Proper event card -->
+        {featuredEvent && (
+          <div class="bg-white/10 border border-white/20 rounded-2xl p-6 backdrop-blur-md shadow-xl lg:ml-auto lg:max-w-md w-full">
+            <p class="text-primary-light text-xs font-semibold uppercase tracking-wide mb-3 flex items-center gap-1.5">
+              <span class="h-1.5 w-1.5 bg-primary-light rounded-full animate-pulse"></span>
+              Proper esdeveniment
+            </p>
+            <p class="text-gray-200 text-sm mb-1 capitalize">
+              {featuredEvent.date.toLocaleDateString('ca-ES', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+            </p>
+            <h2 class="text-xl font-bold text-white mb-4">{featuredEvent.title}</h2>
+            <div class="flex flex-wrap gap-4 mb-5 text-sm text-gray-200">
+              {featuredEvent.distance && (
+                <span class="flex items-center gap-1">
+                  <svg class="h-4 w-4 text-primary-light" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /></svg>
+                  {featuredEvent.distance} km
+                </span>
+              )}
+              {featuredEvent.elevation && (
+                <span class="flex items-center gap-1">
+                  <svg class="h-4 w-4 text-primary-light" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
+                  +{featuredEvent.elevation} m
+                </span>
+              )}
+            </div>
+            <a
+              href={featuredEvent.href}
+              class="inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors"
+            >
+              Veure detalls
+              <svg class="ml-2 h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+            </a>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS amb comptadors animats -->
+  <section class="bg-primary text-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-10">
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        {stats.map((s, i) => (
+          <div class="flex flex-col items-center text-center rounded-xl bg-white/10 px-4 py-5 backdrop-blur-sm">
+            <span class="mb-2 text-white/80">
+              {i === 0 && (<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4zm6 0a3 3 0 10-3-3" /></svg>)}
+              {i === 1 && (<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 21V4a1 1 0 011-1h11l-1.5 3L15 9H4m0 12h16" /></svg>)}
+              {i === 2 && (<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M3 17l6-6 4 4 8-8m0 0h-5m5 0v5" /></svg>)}
+              {i === 3 && (<svg class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>)}
+            </span>
+            <p
+              class="stat-number text-3xl sm:text-4xl font-extrabold tabular-nums"
+              data-target={s.target}
+              data-prefix={s.prefix}
+            >{s.prefix}0</p>
+            <p class="text-white/95 text-sm font-semibold mt-1">{s.label}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PROPERS ESDEVENIMENTS (carreres + caminades) -->
+  {upcomingEvents.length > 0 && (
+    <section class="max-w-6xl mx-auto px-4 sm:px-6 py-16" data-reveal>
+      <SectionHeading
+        eyebrow="No t'ho perdis"
+        title="Propers esdeveniments"
+        subtitle="Carreres i caminades que tenim a la vista"
+        class="mb-8"
+      />
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {upcomingEvents.map(e => (
+          <EventCard
+            title={e.title}
+            date={e.date}
+            href={e.href}
+            type={e.type}
+            distance={e.distance}
+            elevation={e.elevation}
+            difficulty={e.difficulty}
+            image={e.image}
+            featured={e.featured}
+          />
+        ))}
+      </div>
+      <div class="flex flex-wrap items-center gap-3 mt-8">
+        <a href="/carreres" class="inline-flex items-center gap-1 text-primary font-semibold hover:underline">
+          Totes les carreres
+          <Icon name="arrow-right" class="h-4 w-4" />
+        </a>
+        <span class="text-club-beige">·</span>
+        <a href="/caminades" class="inline-flex items-center gap-1 text-primary font-semibold hover:underline">
+          Totes les caminades
+          <Icon name="arrow-right" class="h-4 w-4" />
+        </a>
+      </div>
+    </section>
+  )}
+
+  <!-- ÚLTIMES NOTÍCIES -->
+  {latestNoticies.length > 0 && (
+    <section class="bg-club-light" data-reveal>
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 py-16">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <h2 class="text-2xl font-bold text-club-dark">Últimes notícies</h2>
+            <p class="text-club-mid text-sm mt-1">Informació i comunicats del club</p>
+          </div>
+          <a href="/noticies" class="text-primary text-sm font-semibold hover:underline flex items-center gap-1">
+            Totes les notícies
+            <Icon name="arrow-right" class="h-4 w-4" />
+          </a>
+        </div>
+        <div class="flex flex-col gap-3 max-w-2xl">
+          {latestNoticies.map(n => (
+            <NewsCard
+              title={n.data.title}
+              date={n.data.date}
+              excerpt={n.data.excerpt}
+              href={`/noticies/${n.slug}`}
+              image={n.data.image}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- CTA FES-TE SOCI -->
+  <section class="bg-club-dark text-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14 text-center">
+      <h2 class="text-3xl font-extrabold mb-3">Forma part del Club Atlètic Montblanc</h2>
+      <p class="text-gray-300 text-lg max-w-xl mx-auto mb-8">
+        Accedeix a descomptes en les nostres carreres, forma part d'una comunitat activa i viu l'esport popular de la Conca.
+      </p>
+      <a href="/fes-te-soci" class="inline-flex items-center px-8 py-3 bg-primary text-white font-bold rounded-lg text-lg hover:bg-primary-dark transition-colors">
+        Fes-te soci ara
+        <svg class="ml-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" /></svg>
+      </a>
+    </div>
+  </section>
+
+  <!-- Rotació aleatòria de la foto del hero a cada visita -->
+  <script is:inline>
+    (function () {
+      const fotos = [
+        '/images/inici-club.jpg',
+        '/images/inici-cursa-dona.jpg',
+        '/images/hero-index.jpg',
+        '/images/sant-joan-race.jpg',
+        '/images/sant-josep-popular.jpg',
+        '/images/caminada-grup.jpg',
+      ];
+      const hero = document.getElementById('hero-bg');
+      if (!hero) return;
+      const triada = fotos[Math.floor(Math.random() * fotos.length)];
+      if (triada === hero.getAttribute('src')) return;
+      // Precarreguem: només canviem si la foto existeix i carrega bé
+      const prova = new Image();
+      prova.onload = function () { hero.src = triada; };
+      prova.src = triada;
+    })();
+  </script>
+
+  <!-- Animació dels comptadors de socis -->
+  <script>
+    function animateCounter(el: HTMLElement) {
+      const target = Number(el.dataset.target ?? '0');
+      const prefix = el.dataset.prefix ?? '';
+      const duration = 1400;
+      const start = performance.now();
+      function tick(now: number) {
+        const progress = Math.min((now - start) / duration, 1);
+        // easeOutCubic
+        const eased = 1 - Math.pow(1 - progress, 3);
+        el.textContent = prefix + Math.round(eased * target).toString();
+        if (progress < 1) requestAnimationFrame(tick);
+        else el.textContent = prefix + target.toString();
+      }
+      requestAnimationFrame(tick);
+    }
+
+    const numbers = document.querySelectorAll<HTMLElement>('.stat-number');
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            animateCounter(entry.target as HTMLElement);
+            observer.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.4 });
+      numbers.forEach(n => observer.observe(n));
+    } else {
+      numbers.forEach(n => animateCounter(n));
+    }
+  </script>
+</Layout>

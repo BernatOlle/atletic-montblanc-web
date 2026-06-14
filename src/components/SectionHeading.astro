@@ -1,0 +1,28 @@
+---
+/**
+ * Capçalera de secció unificada: etiqueta (eyebrow) + títol + subtítol.
+ * align: 'left' | 'center'. on: 'light' | 'dark' (per a fons foscos).
+ */
+interface Props {
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  align?: 'left' | 'center';
+  on?: 'light' | 'dark';
+  class?: string;
+}
+
+const { eyebrow, title, subtitle, align = 'left', on = 'light', class: className = '' } = Astro.props;
+
+const wrap = align === 'center' ? 'text-center mx-auto max-w-2xl' : 'text-left';
+const titleColor = on === 'dark' ? 'text-white' : 'text-club-dark';
+const subColor = on === 'dark' ? 'text-gray-300' : 'text-club-mid';
+---
+
+<div class={`${wrap} ${className}`}>
+  {eyebrow && (
+    <p class="text-primary text-sm font-semibold uppercase tracking-wide mb-1">{eyebrow}</p>
+  )}
+  <h2 class={`text-3xl font-extrabold ${titleColor}`}>{title}</h2>
+  {subtitle && <p class={`mt-2 text-lg ${subColor}`}>{subtitle}</p>}
+</div>

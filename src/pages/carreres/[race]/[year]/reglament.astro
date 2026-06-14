@@ -1,0 +1,103 @@
+---
+import Layout from '../../../../layouts/Layout.astro';
+import Icon from '../../../../components/Icon.astro';
+import { getCollection } from 'astro:content';
+import { RACES, type RaceKey } from '../../../../lib/races';
+
+export async function getStaticPaths() {
+  const carreres = await getCollection('carreres');
+  return carreres.map(c => ({
+    params: { race: c.data.race, year: String(c.data.year) },
+    props: { carrera: c },
+  }));
+}
+
+const { carrera } = Astro.props;
+const { Content } = await carrera.render();
+const { title, race, year, edition, date, reglamentUrl } = carrera.data;
+
+const raceInfo = RACES[race as RaceKey];
+
+const formattedDate = date.toLocaleDateString('ca-ES', {
+  day: 'numeric', month: 'long', year: 'numeric',
+});
+---
+
+<Layout title={`Reglament — ${title}`} description={`Reglament i informació de la ${title}`}>
+
+  <!-- Header -->
+  <div class="bg-club-dark text-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-10">
+      <nav class="text-sm text-gray-400 mb-5">
+        <a href="/" class="hover:text-white transition-colors">Inici</a>
+        <span class="mx-2">/</span>
+        <a href="/carreres" class="hover:text-white transition-colors">Carreres</a>
+        <span class="mx-2">/</span>
+        <a href={`/carreres/${race}`} class="hover:text-white transition-colors">{raceInfo.shortName}</a>
+        <span class="mx-2">/</span>
+        <a href={`/carreres/${race}/${year}`} class="hover:text-white transition-colors">{year}</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">Reglament</span>
+      </nav>
+
+      <div class="flex flex-wrap items-center gap-3 mb-3">
+        {edition && (
+          <span class="text-xs font-bold bg-white/15 px-3 py-1 rounded-full">{edition}a edició</span>
+        )}
+        <span class="text-xs text-gray-400">{formattedDate}</span>
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold leading-tight">{title}</h1>
+      <p class="text-primary font-semibold mt-1 text-sm uppercase tracking-widest">Reglament</p>
+    </div>
+  </div>
+
+  <!-- Reading content -->
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
+
+    {reglamentUrl ? (
+      <div class="text-center py-10">
+        <p class="text-club-mid mb-4">El reglament d'aquesta edició és un document extern.</p>
+        <a
+          href={reglamentUrl}
+          target="_blank"
+          rel="noopener"
+          class="inline-flex items-center gap-2 px-6 py-3 bg-primary text-white font-bold rounded-xl hover:bg-primary-dark transition-colors"
+        >
+          <Icon name="document-text" class="h-5 w-5" />
+          Obrir reglament (PDF)
+        </a>
+      </div>
+    ) : (
+      <div class="prose prose-lg max-w-none
+        [&_h2]:text-2xl [&_h2]:font-extrabold [&_h2]:text-club-dark [&_h2]:mt-10 [&_h2]:mb-4 [&_h2]:border-b [&_h2]:border-club-beige [&_h2]:pb-2
+        [&_h3]:text-xl [&_h3]:font-bold [&_h3]:text-club-dark [&_h3]:mt-8 [&_h3]:mb-3
+        [&_p]:text-club-mid [&_p]:leading-relaxed [&_p]:mb-4
+        [&_ul]:text-club-mid [&_ul]:space-y-1 [&_li]:leading-relaxed
+        [&_strong]:text-club-dark [&_strong]:font-semibold
+        [&_a]:text-primary [&_a]:underline [&_a:hover]:text-primary-dark
+        [&_table]:w-full [&_table]:border-collapse
+        [&_th]:text-left [&_th]:font-bold [&_th]:text-club-dark [&_th]:py-2 [&_th]:px-3 [&_th]:border-b-2 [&_th]:border-club-beige
+        [&_td]:py-2 [&_td]:px-3 [&_td]:border-b [&_td]:border-club-beige [&_td]:text-club-mid [&_td]:text-sm
+      ">
+        <Content />
+      </div>
+    )}
+
+    <!-- Back CTA -->
+    <div class="mt-12 pt-8 border-t border-club-beige flex flex-col sm:flex-row items-start sm:items-center gap-4">
+      <a
+        href={`/carreres/${race}/${year}`}
+        class="inline-flex items-center gap-2 px-5 py-3 bg-club-dark text-white font-semibold rounded-xl hover:bg-club-mid transition-colors text-sm"
+      >
+        <Icon name="arrow-left" class="h-4 w-4" />
+        Tornar a la carrera
+      </a>
+      <a
+        href={`/carreres/${race}`}
+        class="text-sm text-club-mid hover:text-primary transition-colors"
+      >
+        Totes les edicions de {raceInfo.shortName} →
+      </a>
+    </div>
+  </div>
+</Layout>

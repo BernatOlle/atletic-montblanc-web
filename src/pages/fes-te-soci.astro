@@ -1,0 +1,168 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import Button from '../components/Button.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+
+const avantatges = [
+  {
+    icon: 'ticket' as const,
+    title: 'Descomptes en les carreres del club',
+    desc: 'Els socis gaudeixen de descomptes exclusius en les inscripcions a totes les carreres organitzades pel Club Atlètic Montblanc.',
+  },
+  {
+    icon: 'map-pin' as const,
+    title: 'Accés prioritari a les caminades',
+    desc: 'Places reservades per a socis en les caminades amb aforament limitat. Mai et quedis sense plaça.',
+  },
+  {
+    icon: 'tag' as const,
+    title: 'Equipació del club',
+    desc: 'Accés a la samarreta i equipació oficial del club a preu especial per a socis.',
+  },
+  {
+    icon: 'bell' as const,
+    title: 'Comunicació directa',
+    desc: 'Rep tota la informació sobre activitats, resultats i comunicats del club directament al teu correu.',
+  },
+  {
+    icon: 'users' as const,
+    title: 'Comunitat activa',
+    desc: 'Forma part d\'una comunitat de més de 150 esportistes de la Conca de Barberà. Entrena, camina i celebra amb nosaltres.',
+  },
+  {
+    icon: 'trophy' as const,
+    title: 'Participació en la vida del club',
+    desc: 'Vot a les assemblees, possibilitat de presentar-te a la junta i ser part activa de les decisions del club.',
+  },
+];
+
+const modalitats = [
+  {
+    nom: 'Soci adult',
+    preu: '—',
+    desc: 'Per a persones majors de 18 anys.',
+    destacat: true,
+  },
+  {
+    nom: 'Soci júnior',
+    preu: '—',
+    desc: 'Per a persones menors de 18 anys.',
+    destacat: false,
+  },
+  {
+    nom: 'Soci familiar',
+    preu: '—',
+    desc: 'Per a unitats familiars. Consulta condicions.',
+    destacat: false,
+  },
+];
+---
+
+<Layout title="Fes-te soci" description="Uneix-te al Club Atlètic Montblanc i gaudeix de descomptes, activitats exclusives i una comunitat esportiva activa a la Conca de Barberà.">
+
+  <section class="bg-club-dark text-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+      <nav class="text-sm text-gray-400 mb-4">
+        <a href="/" class="hover:text-white transition-colors">Inici</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">Fes-te soci</span>
+      </nav>
+      <h1 class="text-4xl font-extrabold">Fes-te soci</h1>
+      <p class="text-gray-300 text-lg mt-2">Uneix-te a la comunitat atlètica de Montblanc</p>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14 space-y-16">
+
+    <!-- Avantatges -->
+    <div>
+      <SectionHeading
+        align="center"
+        title="Per què ser soci?"
+        subtitle="Els socis gaudeixen de beneficis exclusius i formen part activa de la vida del club."
+        class="mb-10"
+      />
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {avantatges.map(a => (
+          <div data-reveal class="bg-white border border-club-beige rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all duration-200 ease-out-soft">
+            <div class="h-10 w-10 bg-primary/10 rounded-lg flex items-center justify-center mb-4">
+              <Icon name={a.icon} class="h-5 w-5 text-primary" />
+            </div>
+            <h3 class="font-bold text-club-dark mb-2">{a.title}</h3>
+            <p class="text-sm text-club-mid leading-relaxed">{a.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Modalitats -->
+    <div>
+      <SectionHeading
+        align="center"
+        title="Modalitats de soci"
+        subtitle="Contacta'ns per conèixer les quotes actuals de cada modalitat."
+        class="mb-10"
+      />
+      <div class="grid sm:grid-cols-3 gap-5 max-w-3xl mx-auto">
+        {modalitats.map(m => (
+          <div class={`rounded-xl p-6 text-center border-2 ${m.destacat ? 'border-primary bg-primary/5' : 'border-club-beige bg-white'}`}>
+            {m.destacat && (
+              <span class="inline-flex items-center gap-1 bg-primary text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
+                <Icon name="star" class="h-3 w-3" />
+                Més popular
+              </span>
+            )}
+            <h3 class="font-bold text-club-dark text-lg mb-1">{m.nom}</h3>
+            <p class="text-2xl font-extrabold text-primary mb-3">{m.preu}</p>
+            <p class="text-sm text-club-mid">{m.desc}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    <!-- Com fer-se soci -->
+    <div class="grid lg:grid-cols-2 gap-12 items-start">
+      <div>
+        <h2 class="text-2xl font-bold text-club-dark mb-6 flex items-center gap-2">
+          <span class="h-1 w-8 bg-primary rounded-full inline-block"></span>
+          Com apuntar-se
+        </h2>
+        <ol class="space-y-5">
+          {[
+            { title: 'Contacta amb el club', desc: 'Envia\'ns un correu a atleticmontblanc@gmail.com o vine a una de les nostres activitats.' },
+            { title: 'Omple el formulari d\'alta', desc: 'Et farem arribar el formulari d\'alta com a soci amb totes les dades necessàries.' },
+            { title: 'Paga la quota anual', desc: 'Un cop formalitzada l\'alta, abona la quota anual corresponent a la modalitat escollida.' },
+            { title: 'Benvingut/da al club!', desc: 'Ja ets soci/a! Rebràs tota la informació de les activitats directament al teu correu.' },
+          ].map((s, i) => (
+            <li class="flex gap-4">
+              <span class="h-8 w-8 bg-primary text-white text-sm font-bold rounded-full flex items-center justify-center flex-shrink-0">{i + 1}</span>
+              <div>
+                <p class="font-semibold text-club-dark">{s.title}</p>
+                <p class="text-sm text-club-mid mt-0.5 leading-relaxed">{s.desc}</p>
+              </div>
+            </li>
+          ))}
+        </ol>
+      </div>
+
+      <div class="bg-club-dark text-white rounded-2xl p-8">
+        <h3 class="text-xl font-bold mb-2">Tens preguntes?</h3>
+        <p class="text-gray-300 text-sm mb-6 leading-relaxed">
+          Si vols més informació sobre les modalitats, quotes o qualsevol altre aspecte, no dubtis en contactar-nos.
+        </p>
+        <a
+          href="mailto:atleticmontblanc@gmail.com"
+          class="flex items-center gap-3 text-white hover:text-primary transition-colors mb-3"
+        >
+          <Icon name="envelope" class="h-5 w-5 text-primary flex-shrink-0" />
+          <span class="text-sm">atleticmontblanc@gmail.com</span>
+        </a>
+        <Button href="/contacte" variant="primary" icon="envelope" iconPosition="left" class="w-full mt-4">
+          Envia'ns un missatge
+        </Button>
+      </div>
+    </div>
+
+  </div>
+</Layout>

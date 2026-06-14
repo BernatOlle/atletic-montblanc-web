@@ -1,0 +1,74 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import EventCard from '../../components/EventCard.astro';
+import { getCollection } from 'astro:content';
+
+const caminades = await getCollection('caminades');
+const sorted = caminades.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+const today = new Date();
+const upcoming = sorted.filter(c => c.data.date >= today);
+const past = sorted.filter(c => c.data.date < today);
+---
+
+<Layout title="Caminades" description="Caminades per la Conca de Barberà organitzades pel Club Atlètic Montblanc.">
+  <section class="bg-club-dark text-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+      <nav class="text-sm text-gray-400 mb-4">
+        <a href="/" class="hover:text-white transition-colors">Inici</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">Caminades</span>
+      </nav>
+      <h1 class="text-4xl font-extrabold">Caminades</h1>
+      <p class="text-gray-300 text-lg mt-2">Descobreix la Conca de Barberà caminant</p>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14 space-y-12">
+    {upcoming.length > 0 && (
+      <section>
+        <h2 class="text-xl font-bold text-club-dark mb-5 flex items-center gap-2">
+          <span class="h-1 w-6 bg-green-700 rounded-full inline-block"></span>
+          Properes caminades
+        </h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {upcoming.map(c => (
+            <EventCard
+              title={c.data.title}
+              date={c.data.date}
+              href={`/caminades/${c.slug}`}
+              type="caminada"
+              distance={c.data.distance}
+              elevation={c.data.elevation}
+              difficulty={c.data.difficulty}
+              image={c.data.image}
+              featured={c.data.featured}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+
+    {past.length > 0 && (
+      <section>
+        <h2 class="text-xl font-bold text-club-dark mb-5 flex items-center gap-2">
+          <span class="h-1 w-6 bg-club-mid rounded-full inline-block"></span>
+          Edicions anteriors
+        </h2>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {past.map(c => (
+            <EventCard
+              title={c.data.title}
+              date={c.data.date}
+              href={`/caminades/${c.slug}`}
+              type="caminada"
+              distance={c.data.distance}
+              elevation={c.data.elevation}
+              difficulty={c.data.difficulty}
+              image={c.data.image}
+            />
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</Layout>

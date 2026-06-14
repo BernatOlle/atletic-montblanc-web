@@ -1,0 +1,109 @@
+---
+import Icon from './Icon.astro';
+
+const navLinks = [
+  { href: '/', label: 'Inici' },
+  { href: '/qui-som', label: 'El Club' },
+  { href: '/carreres', label: 'Carreres' },
+  { href: '/caminades', label: 'Caminades' },
+  { href: '/noticies', label: 'Notícies' },
+  { href: '/contacte', label: 'Contacte' },
+];
+
+const pathname = Astro.url.pathname;
+---
+
+<header class="sticky top-0 z-50 bg-white border-b border-club-beige shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6">
+    <div class="flex items-center justify-between h-16">
+      <!-- Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <img
+          src="https://atleticmontblanc.cat/wp-content/uploads/2018/08/logo-90x90.jpg"
+          alt="Club Atlètic Montblanc"
+          class="h-10 w-10 rounded-full object-cover"
+        />
+        <div class="hidden sm:block">
+          <p class="text-primary font-bold text-sm leading-tight">Club Atlètic</p>
+          <p class="text-club-dark font-bold text-sm leading-tight">Montblanc</p>
+        </div>
+      </a>
+
+      <!-- Nav desktop -->
+      <nav class="hidden md:flex items-center gap-1">
+        {navLinks.map((link) => (
+          <a
+            href={link.href}
+            class={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+              pathname === link.href
+                ? 'text-primary font-semibold'
+                : 'text-club-mid hover:text-club-dark hover:bg-club-light'
+            }`}
+          >
+            {link.label}
+          </a>
+        ))}
+      </nav>
+
+      <!-- CTA + mobile menu -->
+      <div class="flex items-center gap-3">
+        <a
+          href="/fes-te-soci"
+          class="hidden sm:inline-flex items-center px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-primary-dark transition-colors"
+        >
+          Fes-te soci
+        </a>
+
+        <!-- Mobile menu button -->
+        <button
+          id="mobile-menu-btn"
+          class="md:hidden p-2 rounded-md text-club-mid hover:bg-club-light transition-colors"
+          aria-label="Obrir menú"
+          aria-expanded="false"
+          aria-controls="mobile-menu"
+        >
+          <span id="icon-open"><Icon name="menu" class="h-6 w-6" /></span>
+          <span id="icon-close" class="hidden"><Icon name="close" class="h-6 w-6" /></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Mobile nav -->
+    <nav id="mobile-menu" class="hidden md:hidden pb-4 border-t border-club-beige mt-2 pt-2">
+      {navLinks.map((link) => (
+        <a
+          href={link.href}
+          class={`block px-3 py-2 rounded-md text-sm font-medium mb-1 transition-colors ${
+            pathname === link.href
+              ? 'text-primary bg-primary/10 font-semibold'
+              : 'text-club-mid hover:text-club-dark hover:bg-club-light'
+          }`}
+        >
+          {link.label}
+        </a>
+      ))}
+      <a
+        href="/fes-te-soci"
+        class="block mt-2 px-3 py-2 bg-primary text-white text-sm font-semibold rounded-lg text-center hover:bg-primary-dark transition-colors"
+      >
+        Fes-te soci
+      </a>
+    </nav>
+  </div>
+</header>
+
+<script>
+  const btn = document.getElementById('mobile-menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('icon-open');
+  const iconClose = document.getElementById('icon-close');
+
+  btn?.addEventListener('click', () => {
+    const willOpen = menu?.classList.contains('hidden');
+    menu?.classList.toggle('hidden', !willOpen);
+    iconOpen?.classList.toggle('hidden', willOpen);
+    iconClose?.classList.toggle('hidden', !willOpen);
+    btn.setAttribute('aria-expanded', String(willOpen));
+    btn.setAttribute('aria-label', willOpen ? 'Tancar menú' : 'Obrir menú');
+  });
+</script>

@@ -1,0 +1,53 @@
+---
+import Icon from './Icon.astro';
+
+/**
+ * Botó/enllaç unificat del club.
+ * Variants: primary (acció principal), ghost (sobre fons fosc), dark, outline.
+ * Mides: sm | md | lg. Accepta icona opcional (dreta per defecte).
+ */
+interface Props {
+  href: string;
+  variant?: 'primary' | 'ghost' | 'dark' | 'outline';
+  size?: 'sm' | 'md' | 'lg';
+  icon?: string;
+  iconPosition?: 'left' | 'right';
+  external?: boolean;
+  class?: string;
+}
+
+const {
+  href,
+  variant = 'primary',
+  size = 'md',
+  icon,
+  iconPosition = 'right',
+  external = false,
+  class: className = '',
+} = Astro.props;
+
+const base =
+  'inline-flex items-center justify-center gap-2 font-semibold rounded-lg transition-all duration-200 ease-out-soft focus-visible:outline-2';
+
+const variants: Record<string, string> = {
+  primary: 'bg-primary text-white hover:bg-primary-dark shadow-card hover:shadow-card-hover',
+  ghost: 'bg-white/10 text-white border border-white/20 hover:bg-white/20 backdrop-blur-sm',
+  dark: 'bg-club-dark text-white hover:bg-club-mid',
+  outline: 'bg-white border-2 border-club-beige text-club-dark hover:border-primary hover:text-primary',
+};
+
+const sizes: Record<string, string> = {
+  sm: 'px-4 py-2 text-sm',
+  md: 'px-5 py-2.5 text-sm',
+  lg: 'px-8 py-3.5 text-base',
+};
+
+const iconSize = size === 'lg' ? 'h-5 w-5' : 'h-4 w-4';
+const extra = external ? { target: '_blank', rel: 'noopener' } : {};
+---
+
+<a href={href} class={`${base} ${variants[variant]} ${sizes[size]} ${className}`} {...extra}>
+  {icon && iconPosition === 'left' && <Icon name={icon as any} class={iconSize} />}
+  <slot />
+  {icon && iconPosition === 'right' && <Icon name={icon as any} class={iconSize} />}
+</a>

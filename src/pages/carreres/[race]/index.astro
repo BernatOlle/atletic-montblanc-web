@@ -1,0 +1,142 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import Icon from '../../../components/Icon.astro';
+import { getCollection } from 'astro:content';
+import { RACES, RACE_KEYS, type RaceKey } from '../../../lib/races';
+
+export async function getStaticPaths() {
+  return RACE_KEYS.map(race => ({ params: { race }, props: { raceKey: race } }));
+}
+
+const { raceKey } = Astro.props as { raceKey: RaceKey };
+const raceInfo = RACES[raceKey];
+
+const allCarreres = await getCollection('carreres');
+const editions = allCarreres
+  .filter(c => c.data.race === raceKey)
+  .sort((a, b) => b.data.year - a.data.year);
+
+const today = new Date();
+---
+
+<Layout title={raceInfo.name} description={raceInfo.description}>
+
+  <section class="bg-club-dark text-white">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+      <nav class="text-sm text-gray-400 mb-4">
+        <a href="/" class="hover:text-white transition-colors">Inici</a>
+        <span class="mx-2">/</span>
+        <a href="/carreres" class="hover:text-white transition-colors">Carreres</a>
+        <span class="mx-2">/</span>
+        <span class="text-white">{raceInfo.shortName}</span>
+      </nav>
+      <div class="flex flex-wrap items-center gap-3 mb-3">
+        <h1 class="text-4xl font-extrabold">{raceInfo.name}</h1>
+        <span class="text-sm text-gray-400 border border-gray-600 px-3 py-1 rounded-full">{raceInfo.month}</span>
+      </div>
+      <p class="text-gray-300 text-lg max-w-2xl">{raceInfo.description}</p>
+
+      <div class="flex gap-5 mt-5 text-sm text-gray-300">
+        <span class="flex items-center gap-1.5">
+          <Icon name="map" class="h-4 w-4 text-primary" />
+          {raceInfo.distance} km
+        </span>
+        <span class="flex items-center gap-1.5">
+          <Icon name="arrow-trending-up" class="h-4 w-4 text-primary" />
+          +{raceInfo.elevation} m
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+    <h2 class="text-xl font-bold text-club-dark mb-6">
+      Totes les edicions · <span class="text-club-mid font-normal">{editions.length} edicions</span>
+    </h2>
+
+    {editions.length === 0 && (
+      <p class="text-club-mid">Encara no hi ha edicions registrades.</p>
+    )}
+
+    <div class="space-y-3">
+      {editions.map(edition => {
+        const isUpcoming = edition.data.date >= today;
+        const formattedDate = edition.data.date.toLocaleDateString('ca-ES', {
+          day: 'numeric', month: 'long', year: 'numeric',
+        });
+        return (
+          <a
+            href={`/carreres/${raceKey}/${edition.data.year}`}
+            class={`group flex items-center justify-between p-5 rounded-xl border transition-all ${
+              isUpcoming
+                ? 'bg-white border-primary/30 hover:border-primary hover:shadow-md'
+                : 'bg-white border-club-beige hover:border-club-mid hover:shadow-sm'
+            }`}
+          >
+            <div class="flex items-center gap-4">
+              <!-- Year pill -->
+              <span class={`text-2xl font-extrabold w-16 flex-shrink-0 ${isUpcoming ? 'text-primary' : 'text-club-mid'}`}>
+                {edition.data.year}
+              </span>
+
+              <div>
+                <div class="flex items-center gap-2 mb-0.5">
+                  {edition.data.edition && (
+                    <span class="text-xs font-medium text-club-mid">{edition.data.edition}a edició</span>
+                  )}
+                  {isUpcoming ? (
+                    <span class="inline-flex items-center gap-1 bg-primary/10 text-primary text-xs font-semibold px-2 py-0.5 rounded-full">
+                      <span class="h-1.5 w-1.5 bg-primary rounded-full animate-pulse"></span>
+                      Pròxima
+                    </span>
+                  ) : (
+                    <span class="inline-flex items-center gap-1 text-xs text-club-mid">
+                      <Icon name="check-circle" class="h-3.5 w-3.5" />
+                      Finalitzada
+                    </span>
+                  )}
+                </div>
+                <p class="text-sm text-club-mid capitalize">{formattedDate}</p>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-3">
+              {/* Quick actions for upcoming */}
+              {isUpcoming && edition.data.registrationUrl && (
+                <span class="hidden sm:inline-flex items-center gap-1.5 bg-primary text-white text-xs font-semibold px-3 py-1.5 rounded-lg">
+                  <Icon name="ticket" class="h-3.5 w-3.5" />
+                  Inscriu-te
+                </span>
+              )}
+              {/* Quick actions for past */}
+              {!isUpcoming && (edition.data.photosUrl || edition.data.resultsUrl) && (
+                <span class="hidden sm:flex items-center gap-2">
+                  {edition.data.photosUrl && (
+                    <span class="inline-flex items-center gap-1 text-club-mid text-xs border border-club-beige px-2.5 py-1 rounded-lg">
+                      <Icon name="camera" class="h-3.5 w-3.5" />
+                      Fotos
+                    </span>
+                  )}
+                  {edition.data.resultsUrl && (
+                    <span class="inline-flex items-center gap-1 text-club-mid text-xs border border-club-beige px-2.5 py-1 rounded-lg">
+                      <Icon name="chart-bar" class="h-3.5 w-3.5" />
+                      Resultats
+                    </span>
+                  )}
+                </span>
+              )}
+              <Icon name="arrow-right" class={`h-5 w-5 flex-shrink-0 transition-colors ${isUpcoming ? 'text-primary' : 'text-club-mid group-hover:text-club-dark'}`} />
+            </div>
+          </a>
+        );
+      })}
+    </div>
+
+    <div class="mt-8">
+      <a href="/carreres" class="inline-flex items-center gap-2 text-club-mid hover:text-primary transition-colors text-sm font-medium">
+        <Icon name="arrow-left" class="h-4 w-4" />
+        Totes les carreres
+      </a>
+    </div>
+  </div>
+</Layout>
