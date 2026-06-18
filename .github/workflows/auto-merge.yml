@@ -1,0 +1,50 @@
+name: Auto-merge si el build passa
+
+# COST 0: aquest workflow NO usa la API d'Anthropic. Només valida i fa merge.
+# L'agent local (al teu Mac, amb la teva subscripció) ja ha editat i ha obert el PR.
+# Aquí, GitHub només comprova que compila i, si és verd, publica.
+#
+#   PR amb etiqueta "auto"  →  npm ci + npm run build  →  si ✅ merge a main → Vercel publica
+#                                                       →  si ❌ deixa el PR obert i comenta
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  build-and-merge:
+    if: contains(github.event.pull_request.labels.*.name, 'auto')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Build (validació Zod + Astro)
+        run: npm run build
+
+      - name: Auto-merge (només si el build ha passat)
+        if: success()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr merge ${{ github.event.pull_request.number }} --squash --delete-branch --admin
+
+      - name: Comentar si el build falla
+        if: failure()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh pr comment ${{ github.event.pull_request.number }} --body "❌ El build ha fallat; no s'ha publicat res. Revisa els canvis."

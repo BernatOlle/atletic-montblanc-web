@@ -15,3 +15,10 @@ atleticmontblanc/
 # Variables d'entorn
 .env
 .env.*
+!.env.example
+
+# Estat i logs de l'agent local (no es committegen)
+automation/.env
+automation/.last_update_id
+automation/.last_cowork_update_id
+automation/last_run.txt

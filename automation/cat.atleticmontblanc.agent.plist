@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  LaunchAgent de macOS per a Claude Code (developer) — cost 0.
+  Sondeja Linear per tasques "Todo" (les que ha redactat Cowork) i les implementa.
+
+  Comportament respecte al teu Mac:
+    • RunAtLoad=true  → s'executa quan inicies sessió (= "quan s'encén el Mac").
+    • StartInterval   → a més, es torna a executar cada 15 min mentre el Mac és actiu.
+    • Si el Mac està ADORMIT a l'hora prevista, launchd l'executa EN DESPERTAR.
+    • Si el Mac està APAGAT, les tasques esperen a Linear; en encendre'l, RunAtLoad
+      llança Claude Code i les desenvolupa.
+
+  INSTAL·LACIÓ (una vegada):
+    1. Edita la ruta de WorkingDirectory i ProgramArguments perquè apuntin a on
+       tens el repo (substitueix /RUTA/AL/REPO).
+    2. cp automation/cat.atleticmontblanc.agent.plist ~/Library/LaunchAgents/
+    3. launchctl load ~/Library/LaunchAgents/cat.atleticmontblanc.agent.plist
+    Per aturar-lo:  launchctl unload ~/Library/LaunchAgents/cat.atleticmontblanc.agent.plist
+-->
+<plist version="1.0">
+<dict>
+  <key>Label</key>
+  <string>cat.atleticmontblanc.agent</string>
+
+  <key>ProgramArguments</key>
+  <array>
+    <string>/bin/bash</string>
+    <string>/RUTA/AL/REPO/automation/run-agent.sh</string>
+  </array>
+
+  <key>WorkingDirectory</key>
+  <string>/RUTA/AL/REPO</string>
+
+  <!-- S'executa en iniciar sessió (encendre el Mac) -->
+  <key>RunAtLoad</key>
+  <true/>
+
+  <!-- I cada 15 minuts mentre el Mac estigui actiu -->
+  <key>StartInterval</key>
+  <integer>900</integer>
+
+  <!-- PATH perquè trobi `claude`, `npm`, `jq`, `git`. Ajusta si cal. -->
+  <key>EnvironmentVariables</key>
+  <dict>
+    <key>PATH</key>
+    <string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+  </dict>
+
+  <key>StandardOutPath</key>
+  <string>/RUTA/AL/REPO/automation/launchd.out.log</string>
+  <key>StandardErrorPath</key>
+  <string>/RUTA/AL/REPO/automation/launchd.err.log</string>
+</dict>
+</plist>

@@ -14,7 +14,7 @@ const formattedDate = date.toLocaleDateString('ca-ES', { day: 'numeric', month: 
 <a href={href} class="group flex gap-4 p-4 bg-white rounded-xl border border-club-beige hover:border-primary hover:shadow-md transition-all duration-200">
   <div class="h-20 w-24 flex-shrink-0 rounded-lg overflow-hidden bg-club-light">
     {image ? (
-      <img src={image} alt={title} class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+      <img src={image} alt={title} loading="lazy" decoding="async" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
     ) : (
       <div class="w-full h-full flex items-center justify-center">
         <svg class="h-8 w-8 text-club-mid opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">

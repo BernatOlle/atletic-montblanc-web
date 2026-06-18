@@ -1,0 +1,41 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const enllacos = [
+  { href: '/', label: 'Inici' },
+  { href: '/carreres', label: 'Carreres' },
+  { href: '/caminades', label: 'Caminades' },
+  { href: '/noticies', label: 'Notícies' },
+  { href: '/contacte', label: 'Contacte' },
+];
+---
+
+<Layout title="Pàgina no trobada" description="La pàgina que busques no existeix o s'ha mogut.">
+  <section class="bg-club-dark text-white">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 py-24 sm:py-32 text-center">
+      <p class="text-7xl sm:text-8xl font-extrabold text-primary-light mb-4">404</p>
+      <h1 class="text-2xl sm:text-3xl font-bold mb-4">Aquesta pàgina no existeix</h1>
+      <p class="text-gray-200 text-lg leading-relaxed mb-10 max-w-xl mx-auto">
+        Pot ser que l'enllaç sigui antic o que la pàgina s'hagi mogut. No passa res:
+        torna a l'inici o tria on vols anar.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3">
+        <a
+          href="/"
+          class="inline-flex items-center px-6 py-3 bg-primary text-white font-semibold rounded-lg hover:bg-primary-dark transition-colors shadow-lg shadow-primary/30"
+        >
+          Torna a l'inici
+        </a>
+      </div>
+
+      <nav class="mt-10 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm">
+        {enllacos.map((e) => (
+          <a href={e.href} class="text-gray-200 hover:text-white underline underline-offset-4">
+            {e.label}
+          </a>
+        ))}
+      </nav>
+    </div>
+  </section>
+</Layout>

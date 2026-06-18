@@ -1,0 +1,128 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { getCollection } from 'astro:content';
+import { RACES, type RaceKey } from '../lib/races';
+
+const allCarreres = await getCollection('carreres');
+const allCaminades = await getCollection('caminades');
+
+const today = new Date();
+
+const CAMINADA_FALLBACK = '/images/caminada-grup.jpg';
+
+type Event = {
+  title: string;
+  date: Date;
+  href: string;
+  type: 'carrera' | 'caminada';
+  distance?: number;
+  elevation?: number;
+  difficulty?: string;
+};
+
+const carreres: Event[] = allCarreres
+  .filter((c) => c.data.date >= today)
+  .map((c) => ({
+    title: c.data.title,
+    date: c.data.date,
+    href: `/carreres/${c.data.race}/${c.data.year}`,
+    type: 'carrera',
+    distance: c.data.distance,
+    elevation: c.data.elevation,
+  }));
+
+const caminades: Event[] = allCaminades
+  .filter((c) => c.data.date >= today)
+  .map((c) => ({
+    title: c.data.title,
+    date: c.data.date,
+    href: `/caminades/${c.slug}`,
+    type: 'caminada',
+    distance: c.data.distance,
+    elevation: c.data.elevation,
+    difficulty: c.data.difficulty,
+  }));
+
+const events = [...carreres, ...caminades].sort(
+  (a, b) => a.date.getTime() - b.date.getTime()
+);
+
+// Agrupar per "mes any" (ex: "juny 2026")
+const grups = new Map<string, Event[]>();
+for (const ev of events) {
+  const clau = ev.date.toLocaleDateString('ca-ES', { month: 'long', year: 'numeric' });
+  if (!grups.has(clau)) grups.set(clau, []);
+  grups.get(clau)!.push(ev);
+}
+const mesos = [...grups.entries()];
+---
+
+<Layout
+  title="Calendari"
+  description="Totes les carreres i caminades properes del Club Atlètic Montblanc en una sola vista."
+>
+  <section class="max-w-4xl mx-auto px-4 sm:px-6 py-12 sm:py-16">
+    <SectionHeading
+      eyebrow="Agenda"
+      title="Calendari d'esdeveniments"
+      subtitle="Totes les carreres i caminades properes, ordenades per data."
+      align="center"
+      class="mb-12"
+    />
+
+    {mesos.length === 0 && (
+      <p class="text-center text-club-mid">
+        Ara mateix no hi ha esdeveniments programats. Torna-hi aviat!
+      </p>
+    )}
+
+    <div class="space-y-12">
+      {mesos.map(([mes, llista]) => (
+        <div>
+          <h2 class="text-lg font-bold text-club-dark capitalize mb-4 border-b border-club-beige pb-2">
+            {mes}
+          </h2>
+          <ul class="space-y-3">
+            {llista.map((ev) => (
+              <li>
+                <a
+                  href={ev.href}
+                  class="flex items-center gap-4 rounded-xl border border-club-beige p-4 hover:border-primary hover:bg-club-light transition-colors"
+                >
+                  <div class="flex flex-col items-center justify-center w-14 shrink-0 text-center">
+                    <span class="text-2xl font-extrabold text-primary leading-none">
+                      {ev.date.toLocaleDateString('ca-ES', { day: 'numeric' })}
+                    </span>
+                    <span class="text-xs uppercase text-club-mid">
+                      {ev.date.toLocaleDateString('ca-ES', { month: 'short' })}
+                    </span>
+                  </div>
+                  <div class="min-w-0">
+                    <span
+                      class={`inline-block text-xs font-semibold uppercase tracking-wide mb-1 ${
+                        ev.type === 'carrera' ? 'text-primary' : 'text-club-mid'
+                      }`}
+                    >
+                      {ev.type === 'carrera' ? 'Carrera' : 'Caminada'}
+                    </span>
+                    <p class="font-bold text-club-dark truncate">{ev.title}</p>
+                    <p class="text-sm text-club-mid">
+                      {[
+                        ev.distance ? `${ev.distance} km` : null,
+                        ev.elevation ? `${ev.elevation} m D+` : null,
+                        ev.difficulty ?? null,
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </p>
+                  </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+  </section>
+</Layout>
