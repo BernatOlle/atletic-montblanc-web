@@ -21,4 +21,5 @@ atleticmontblanc/
 automation/.env
 automation/.last_update_id
 automation/.last_cowork_update_id
+automation/.intake_state.json
 automation/last_run.txt
