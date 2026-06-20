@@ -50,7 +50,7 @@ linear() { # linear <graphql-query-json>  → resposta JSON
 # Demana per Telegram els camps que falten i crea les tasques completes a Linear.
 log "Processant intake de Telegram (/telegram-inbox)…"
 cd "$REPO_DIR"
-if ! claude -p "/telegram-inbox" --permission-mode acceptEdits >> "$LOG_FILE" 2>&1; then
+if ! claude -p "/telegram-inbox" --dangerously-skip-permissions >> "$LOG_FILE" 2>&1; then
   log "Intake de Telegram ha fallat; continuo amb les tasques de Linear."
 fi
 
@@ -103,10 +103,10 @@ Instruccions:
    Al cos del PR, posa 'Tasca: $URL'.
 4. Acaba amb un resum breu (1-3 frases) del que has fet."
 
-  if claude -p "$PROMPT" --permission-mode acceptEdits > "$SCRIPT_DIR/last_run.txt" 2>&1; then
+  if claude -p "$PROMPT" --dangerously-skip-permissions > "$SCRIPT_DIR/last_run.txt" 2>&1; then
     SUMMARY="$(tail -c 1200 "$SCRIPT_DIR/last_run.txt")"
     # Mou la tasca a "Done" (cerca un estat de tipus "completed" al team).
-    DONE_STATE="$(linear "$(jq -n --arg team "$LINEAR_TEAM_ID" '{query:"query($team: String!){ workflowStates(filter:{ team:{ id:{ eq:$team } }, type:{ eq:\"completed\" } }, first:1){ nodes{ id } } }", variables:{ team:$team }}')" | jq -r '.data.workflowStates.nodes[0].id // empty')"
+    DONE_STATE="$(linear "$(jq -n --arg team "$LINEAR_TEAM_ID" '{query:"query($team: ID!){ workflowStates(filter:{ team:{ id:{ eq:$team } }, type:{ eq:\"completed\" } }, first:1){ nodes{ id } } }", variables:{ team:$team }}')" | jq -r '.data.workflowStates.nodes[0].id // empty')"
     if [ -n "$DONE_STATE" ]; then
       linear "$(jq -n --arg id "$ISSUE_ID" --arg st "$DONE_STATE" '{query:"mutation($id: String!, $st: String!){ issueUpdate(id:$id, input:{ stateId:$st }){ success } }", variables:{ id:$id, st:$st }}')" >/dev/null || true
     fi
