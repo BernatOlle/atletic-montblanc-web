@@ -41,7 +41,11 @@ jobs:
         if: success()
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh pr merge ${{ github.event.pull_request.number }} --squash --delete-branch --admin
+        # Merge i esborrat de branca tots dos via API (sense git local: el runner
+        # només té la branca del PR, no 'main', i --delete-branch hi fallava).
+        run: |
+          gh pr merge ${{ github.event.pull_request.number }} --squash --admin
+          gh api -X DELETE repos/${{ github.repository }}/git/refs/heads/${{ github.event.pull_request.head.ref }} || true
 
       - name: Comentar si el build falla
         if: failure()
