@@ -2,11 +2,10 @@
 # =============================================================================
 # Agent developer local — COST 0, NOMÉS CLAUDE
 # =============================================================================
-# A cada tanda, Claude Code:
-#   0. Processa Telegram (command /telegram-inbox, plantilla guiada): demana per
-#      Telegram els camps que falten i, quan estan complets, crea la tasca a Linear.
+# A cada tanda, Claude Code NOMÉS llegeix Linear (mai Telegram: l'intake de
+# Telegram és feina de Cowork, que redacta les tasques a Linear). Aquí:
 #   1. Busca tasques a Linear en estat "Todo" del team configurat.
-#   2. Per cada tasca, la mou a "In Progress", la desenvolupa, fa build + push + PR.
+#   2. Per cada tasca, la desenvolupa i fa build + push + PR amb etiqueta `auto`.
 #   3. Si tot va bé, mou la tasca a "Done" i avisa per Telegram.
 #
 # El "cervell" és aquest Mac amb la teva SUBSCRIPCIÓ de Claude (Claude Code headless).
@@ -45,14 +44,6 @@ linear() { # linear <graphql-query-json>  → resposta JSON
     -H "Authorization: ${LINEAR_API_KEY}" \
     -d "$1"
 }
-
-# --- 0. Processar Telegram (plantilla guiada) --------------------------------
-# Demana per Telegram els camps que falten i crea les tasques completes a Linear.
-log "Processant intake de Telegram (/telegram-inbox)…"
-cd "$REPO_DIR"
-if ! claude -p "/telegram-inbox" --dangerously-skip-permissions >> "$LOG_FILE" 2>&1; then
-  log "Intake de Telegram ha fallat; continuo amb les tasques de Linear."
-fi
 
 # --- 1. Buscar tasques a "Todo" del team -------------------------------------
 log "Buscant tasques Todo a Linear…"
